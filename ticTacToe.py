@@ -1,6 +1,9 @@
+import random
+
+
 #Constants for checking whose turn it is
-TURN_X = 0
-TURN_O = 1
+HUMAN = 0
+BOT = 1
 
 #=======================================
 class ticTacToe:
@@ -8,19 +11,26 @@ class ticTacToe:
         """
         Initialize new ticTacToe game
         """
-        self.player = TURN_X
+        self.player = HUMAN
         self.board = []
-
+        self.available = []
     #=======================================
     def create_board(self):
         """
         Creates empty ticTacToe board
         """
-        for i in range(3):
-            row = []
-            for j in range(3):
-                 row.append('-')
-            self.board.append(row)
+        # for i in range(3):
+        #     row = []
+        #     for j in range(3):
+        #          row.append('-')
+        #     self.board.append(row)
+        self.board = [["-","-","-"],
+                        ["-","-","-"],
+                        ["-","-","-"]]
+        
+        for i in range(1, 4):
+            for j in range(1, 4):
+                self.available.append("{0},{1}".format(i,j))
 
     #=======================================
     def display(self):
@@ -32,27 +42,27 @@ class ticTacToe:
             for y in x:
                 print(y, end=" ")
             print("")
-
+            
     #=======================================
     def change_players(self):
         """
-        Changes from X -> O and vice versa
+        Changes from PLAYER -> BOT and vice versa
         """
-        if self.player == TURN_X:
-            self.player = TURN_O
-        elif self.player == TURN_O:
-            self.player = TURN_X
+        if self.player == HUMAN:
+            self.player = BOT
+        elif self.player == BOT:
+            self.player = HUMAN
 
     #=======================================
-    def get_player(self):
+    def get_x_or_o(self):
         """
         Obtains whose current turn it is
 
         Returns (char): A character representing turn either X or O
         """
-        if self.player == TURN_X:
+        if self.player == HUMAN:
             return 'X'
-        elif self.player == TURN_O:
+        elif self.player == BOT:
             return 'O'
 
     #=======================================
@@ -60,19 +70,47 @@ class ticTacToe:
         """
         Prompts the user for row and column input and then places mark X or O in spot
         """
-        row, col = input("Please enter the row and column to place your {0}: ".format(self.get_player())).split()
-        self.board[int(row) - 1][int(col) - 1] = self.get_player()
+        if(self.player == HUMAN):
+            valid = False 
+            while valid == False:
+                try:
+                    row, col = input("Please enter the row and column to place your {0}: ".format(self.get_x_or_o())).split()
+                except:
+                    print("Not valid entry format")
+                    continue
+                if self.available.__contains__("{0},{1}".format(row, col)):
+                    valid = True
+                else:
+                    print("Not a valid spot")
+
+            self.board[int(row) - 1][int(col) - 1] = self.get_x_or_o()
+            self.available.remove("{0},{1}".format(row, col))
+        
+        # Bot will pick a random move from the available moves
+        elif(self.player == BOT):
+            pick = random.randrange(len(self.available))
+            form = self.available[pick]
+            row, col = form.split(",")
+            self.board[int(row) - 1][int(col) - 1] = self.get_x_or_o()
+            self.available.remove("{0},{1}".format(row, col))
+            print("Opponent Placed")
+            
+
 
     #=======================================
     def run(self):
         """
         Runs ticTacToe game
         """
+        #Continue so long as there are available moves
         self.create_board()
-        for x in range(9):
+        while len(self.available) > 0:
             self.display()
             self.turn()
             self.change_players()
+
+        self.display()
+        print("\n\n*****Game Over*****")
 
 #=======================================
 def main():
