@@ -1,0 +1,4 @@
+#File for all files that should be ignored by git
+
+#Virtual environment venv the venv used 3.6.3 python
+venv/*
