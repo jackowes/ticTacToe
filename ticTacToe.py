@@ -103,6 +103,10 @@ class ticTacToe:
         """
 
         piece = self.get_x_or_o()
+        if self.player == HUMAN:
+            eva = -1
+        else:
+            eva = 1
 
         for i in range(3):
             for j in range(3):
@@ -110,7 +114,7 @@ class ticTacToe:
                     break
                 if j == 2:
                     self.has_won = True
-                    return True
+                    return eva
 
         for i in range(3):
             for j in range(3):
@@ -118,17 +122,23 @@ class ticTacToe:
                     break
                 if j == 2:
                     self.has_won = True
-                    return True
+                    return eva
 
         if self.board[0][0] == piece and self.board[1][1] == piece and self.board[2][2] == piece:
             self.has_won = True
-            return True
+            return eva
 
         if self.board[0][2] == piece and self.board[1][1] == piece and self.board[2][0] == piece:
             self.has_won = True
-            return True
+            return eva
 
-        return False
+        return 0
+
+    #=======================================
+    def minimax(self):
+        """
+        This algorithm will find the best move
+        """
 
 
 
@@ -143,7 +153,7 @@ class ticTacToe:
         while len(self.available) > 0:
             self.display()
             self.turn()
-            if self.win_check():
+            if self.win_check() != 0:
                 break
             self.change_players()
 
