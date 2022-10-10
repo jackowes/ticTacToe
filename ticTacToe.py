@@ -43,7 +43,6 @@ def min_max(board, depth):
             max_eval = max(eval, max_eval)
             if eval > max_eval: 
                 max_move = child
-                print(child)
 
         if depth == 0: return max_move
         return max_eval
@@ -66,13 +65,8 @@ def min_max(board, depth):
 
             if eval < min_eval and depth == 0: 
                 min_move = child
-                print(child)
 
             min_eval = copy.copy(min(eval, min_eval))
-            if depth == 0:
-                print(f"eval is: {eval} and min_eval is: {min_eval}")
-
-            
 
         if depth == 0: return min_move
         return min_eval
@@ -306,6 +300,11 @@ class ticTacToe:
         """
         #Continue so long as there are available moves
         self.create_board()
+
+        #Pick randomly whether human or bot starts
+        start = [HUMAN, BOT]
+        self.player = random.choice(start)
+
         while len(self.available) > 0:
             self.display()
             #self.turn()  replace with minmax algorithm
