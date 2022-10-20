@@ -38,8 +38,6 @@ def min_max(curr_game, max_or_min, depth, max_depth):
             return eval
  
 
-
-    
     """
     The maximizing player
     """
@@ -71,8 +69,6 @@ def min_max(curr_game, max_or_min, depth, max_depth):
         if depth == max_depth: return max_move
         return max_eval
             
-    
-
     
     """
     Minimizing portion
@@ -115,12 +111,13 @@ def eval_row(player_char, row):
 
         if occupied_spaces == 1:
             return
-        if occupied_spaces == 2:
+        elif occupied_spaces == 2:
             if open_spaces == 2:
                 twoWtwo += 1
             elif open_spaces == 1:
                 twoWone += 1
-        if occupied_spaces == 3:
+            
+        elif occupied_spaces == 3:
             if open_spaces == 2:
                 threeWtwo += 1
             elif open_spaces == 1:
@@ -135,41 +132,46 @@ def eval_row(player_char, row):
         elif char == player_char:
             occupied_spaces += 1
         else:
+            the_check()
             occupied_spaces = 0
             open_spaces = 0
             
-    
+    the_check()
     return (threeWtwo, threeWone, twoWtwo, twoWone)
 
 def eval_board(board, player_char):
     #Eval Each board
     score = 0
-    board =            [["-","X","X","X","-","-"],
-                        ["-","X","X","-","X","X"],
-                        ["-","X","O","X","-","-"], 
-                        ["X","X","-","-","-","-"], 
-                        ["-","-","-","X","X","X"]]
-    player_char = "X"
+    # board =            [["-","O","O","O","-","-"],
+    #                     ["-","X","X","-","X","X"],
+    #                     ["-","X","O","X","-","-"], 
+    #                     ["X","X","-","-","-","-"], 
+    #                     ["-","-","-","O","O","O"]]
+    # player_char = "X"
+    
     opponent_char = ""
-
     #Set player and opponent
     if player_char == "X":
         opponent_char = "O"
     else:
         opponent_char = "X"
 
-
     for row in board:
         #Eval current player
         (threeWtwo, threeWone, twoWtwo, twoWone) = eval_row(player_char, row)
         score += (200 * threeWtwo) + (150 * threeWone) + (20 * twoWtwo) + (5 * twoWone)
-        print("Score + " + str((200 * threeWtwo) + (150 * threeWone) + (20 * twoWtwo) + (5 * twoWone)))
-        #Eval opponent player
+        print("Player Score + " + str((200 * threeWtwo) + (150 * threeWone) + (20 * twoWtwo) + (5 * twoWone)))
         
+        #Eval opponent player
         (threeWtwo, threeWone, twoWtwo, twoWone) = eval_row(opponent_char, row)
         score -= (80 * threeWtwo) + (40 * threeWone) + (15 * twoWtwo) + (2 * twoWone)
+        print("Opponent Score + " + str((80 * threeWtwo) + (40 * threeWone) + (15 * twoWtwo) + (2 * twoWone)) + "\n")
     
-    print("Total score= ", score)
+    # print(threeWone)
+    # print(threeWtwo)
+    # print(twoWone)
+    # print(twoWtwo)
+    # print("Total score= ", score)
    
 #The psuedocode
 # 2with 1 = 0
@@ -402,7 +404,10 @@ if __name__ == '__main__':
     #eval_board(None, None)
     ticGame = ticTacToe()
     ticGame.create_board()
-    moves = ticGame.successor_function()
+#    moves = ticGame.successor_function()
+
+    while 
+
     ticGame.display()
     print(f"\n{moves}")
     print(f"\n{ticGame.win_check()}")
