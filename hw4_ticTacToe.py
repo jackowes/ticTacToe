@@ -6,71 +6,193 @@ import time
 X = 0
 O = 1
 
+MAXIMIZING = 1
+MINIMIZING = 0
 
 #this function needs the available function, the win check, and the eval changed. It also needs to be able to pass a depth like normal. 
-def min_max(board, depth):
+def min_max(curr_game, max_or_min, depth, max_depth):
     """
     Here I need to give it the eval function that we are looking for
     """
-    if len(board.available) == 0 or board.better_win_check() == True:
-        if board.player == X and board.better_win_check() == True:
-            return -1
-        elif board.player == O and board.better_win_check() == True:
-            
-            return 1
-            
-        else:
-            
+    available_moves = curr_game.successor_function()
+    
+    #Base case when:
+    # - we have no possible moves
+    # - a player has won
+    # - we hit max search depth
+    if len(available_moves) == 0 or curr_game.win_check() == True or depth == max_depth:
+        #Check for win
+        if curr_game.win_check() == True:
+            if max_or_min == MAXIMIZING: #this needs to be changed to max or min I think
+                return 1000
+            elif max_or_min == MINIMIZING:
+                return -1000       
+
+        #Check for draw
+        elif curr_game.win_check() == False and len(available_moves) == 0:
             return 0
 
-    if board.player == X:
-        max_eval = -1000
-        max_move = board.available[0]
-        for child in board.available:
-            form = child
-            row, col = form.split(",")
+        #Check when max depth is hit
+        else:
+            eval = eval_board(curr_game.board, curr_game.get_x_or_o)
+            return eval
+ 
 
-            new_board = copy.deepcopy(board)
 
-            
-            new_board.board[int(row) - 1][int(col) - 1] = new_board.get_x_or_o()
-            new_board.available.remove("{0},{1}".format(row, col))
-            new_board.change_players()
-            
-
-            eval = min_max(new_board, depth + 1)
-            max_eval = max(eval, max_eval)
-            if eval > max_eval: 
-                max_move = child
-
-        if depth == 0: return max_move
-        return max_eval
     
-    if board.player == O:
-        min_eval = 1000
-        min_move = 0
-        for child in board.available:
-            form = child
-            row, col = form.split(",")
+    """
+    The maximizing player
+    """
+    if max_or_min == MAXIMIZING:
+        
+        max_eval = -1000
+        max_move = available_moves[0]
+        
+        # Searches for best possible maxmizing move
+        for child in available_moves:
+            row, col = child.split(",") #does it modify?
 
-            new_board = copy.deepcopy(board)
+            new_game = copy.deepcopy(curr_game)
 
             
-            new_board.board[int(row) - 1][int(col) - 1] = new_board.get_x_or_o()
-            new_board.available.remove("{0},{1}".format(row, col))
-            new_board.change_players()
+            new_game.board[int(row) - 1][int(col) - 1] = new_game.get_x_or_o()
+            #new_game.available.remove("{0},{1}".format(row, col))
+            new_game.change_players()
+            
 
-            eval = min_max(new_board, depth + 1)
+            eval = min_max(new_game, MINIMIZING, depth + 1, max_depth)
+            # max_eval = max(eval, max_eval)
+            
+            if eval > max_eval: 
+                max_eval = eval
+                max_move = child
+            
+        # Return move if we finish searching or max eval if we still need to search
+        if depth == max_depth: return max_move
+        return max_eval
+            
+    
 
-            if eval < min_eval and depth == 0: 
+    
+    """
+    Minimizing portion
+    """
+    if max_or_min == MINIMIZING:
+        min_eval = 1000
+        min_move = available_moves[0]
+        for child in available_moves:
+            row, col = child.split(",") #does it modify?
+
+            new_game = copy.deepcopy(curr_game)
+
+            
+            new_game.board[int(row) - 1][int(col) - 1] = new_game.get_x_or_o()
+            # new_game.available.remove("{0},{1}".format(row, col))
+            new_game.change_players()
+
+            eval = min_max(new_game, MAXIMIZING, depth + 1)
+
+            if eval < min_eval: 
+                min_eval = eval
                 min_move = child
 
-            min_eval = copy.copy(min(eval, min_eval))
-
-        if depth == 0: return min_move
+        if depth == max_depth: return min_move
         return min_eval
 
 
+#################################################
+
+def eval_row(player_char, row):
+    twoWone = 0
+    twoWtwo = 0
+    threeWone = 0
+    threeWtwo = 0
+    open_spaces = 0
+    occupied_spaces = 0
+
+    def the_check():
+        nonlocal twoWone, twoWtwo, threeWone, threeWtwo, open_spaces, occupied_spaces
+
+        if occupied_spaces == 1:
+            return
+        if occupied_spaces == 2:
+            if open_spaces == 2:
+                twoWtwo += 1
+            elif open_spaces == 1:
+                twoWone += 1
+        if occupied_spaces == 3:
+            if open_spaces == 2:
+                threeWtwo += 1
+            elif open_spaces == 1:
+                threeWone += 1
+                
+    for char in row:
+        if char == "-":
+            open_spaces += 1
+            the_check()
+            open_spaces = 1
+            occupied_spaces = 0
+        elif char == player_char:
+            occupied_spaces += 1
+        else:
+            occupied_spaces = 0
+            open_spaces = 0
+            
+    
+    return (threeWtwo, threeWone, twoWtwo, twoWone)
+
+def eval_board(board, player_char):
+    #Eval Each board
+    score = 0
+    board =            [["-","X","X","X","-","-"],
+                        ["-","X","X","-","X","X"],
+                        ["-","X","O","X","-","-"], 
+                        ["X","X","-","-","-","-"], 
+                        ["-","-","-","X","X","X"]]
+    player_char = "X"
+    opponent_char = ""
+
+    #Set player and opponent
+    if player_char == "X":
+        opponent_char = "O"
+    else:
+        opponent_char = "X"
+
+
+    for row in board:
+        #Eval current player
+        (threeWtwo, threeWone, twoWtwo, twoWone) = eval_row(player_char, row)
+        score += (200 * threeWtwo) + (150 * threeWone) + (20 * twoWtwo) + (5 * twoWone)
+        print("Score + " + str((200 * threeWtwo) + (150 * threeWone) + (20 * twoWtwo) + (5 * twoWone)))
+        #Eval opponent player
+        
+        (threeWtwo, threeWone, twoWtwo, twoWone) = eval_row(opponent_char, row)
+        score -= (80 * threeWtwo) + (40 * threeWone) + (15 * twoWtwo) + (2 * twoWone)
+    
+    print("Total score= ", score)
+   
+#The psuedocode
+# 2with 1 = 0
+# 2 with 2 = 0
+# 3 with 1 = 0
+# 3 with 2 = 0
+
+# open_space = 0 
+# Occupied spaces = 0
+
+# For row in rows:
+# For spaces in row:
+# 	If space = empty:
+# 		Open_space += 1
+# 		Do the check
+# 		Open_space = 1 
+# 		Occupied_spaces = 0
+# 	If space = player:
+# 		Occupied_spaces += 1
+# 	Else:
+# 		occupied_spaces = 0
+#       open_space = 0
+		
 
 
 
@@ -95,12 +217,12 @@ class ticTacToe:
         #     for j in range(3):
         #          row.append('-')
         #     self.board.append(row)
-        
+
         #Should this board just be populated in this way in the constructor
         #Or should I create this board using for statements and a row and col variable so that the size can be changed? I think that's too much as the win check would have to be changed too
-        self.board = [["-","-","-","-","-","-"],
+        self.board =   [["-","-","-","-","-","-"],
                         ["-","-","-","-","-","-"],
-                        ["-","-","-","-","-","-"], 
+                        ["-","-","O","X","-","-"], 
                         ["-","-","-","-","-","-"], 
                         ["-","-","-","-","-","-"]]
 
@@ -167,7 +289,7 @@ class ticTacToe:
                     if(((col + 1) < 6) and self.board[row][ col + 1] == "-" and (row, col + 1) not in available):
                         available.append((row, col + 1))    
 
-                    #diaganols (is that how you spell it?)
+                    #diagonals
                     if(((row - 1) >= 0) and ((col + 1) < 6) and self.board[row - 1][col + 1] == "-" and (row - 1, col + 1) not in available):
                         available.append((row - 1, col + 1))
 
@@ -217,6 +339,42 @@ class ticTacToe:
 
 
         # need to check diagonals
+        
+        #top left to bottom right diagonals
+        tl_diagonals = [(1,0), (0,0), (0,1), (0,2)]
+
+        #top right to bottom left diagonals
+        tr_diagonals = [(1,5), (0, 5), (0, 4), (0, 3)]
+
+
+        #top left diagonal search
+        for start in tl_diagonals:
+            spot = list(start)
+            count = 0
+            while spot[0] < 5 and spot[1] < 6:
+                if(self.board[spot[0]][spot[1]] == player):
+                    count += 1
+                else:
+                    count = 0
+                if(count >= 4):
+                    return True
+                spot[0] += 1
+                spot[1] += 1
+        
+        for start in tr_diagonals:
+            spot = list(start)
+            count = 0
+            print(spot)
+            while spot[0] < 5 and spot[1] >= 0:
+                
+                if(self.board[spot[0]][spot[1]] == player):
+                    count += 1
+                else:
+                    count = 0
+                if(count >= 4):
+                    return True
+                spot[0] += 1
+                spot[1] -= 1
 
 
         return False
@@ -241,23 +399,10 @@ class ticTacToe:
 
 #=======================================
 if __name__ == '__main__':
+    #eval_board(None, None)
     ticGame = ticTacToe()
     ticGame.create_board()
-    ticGame.board[2][3] = "X"
-    ticGame.board[2][2] = "O"
-    start = time.process_time()
-    start2 = time.time()
     moves = ticGame.successor_function()
-    t = 0
-    for x in range(100000):
-        t += x
-    end = time.process_time()
-    end2 = time.time()
-    exec_time = end - start
-    exec_time2 = end2 - start2
     ticGame.display()
     print(f"\n{moves}")
-    print(f"\n{exec_time}")
-    print(f"\n{exec_time2}")
-    print(f"\n{t}")
     print(f"\n{ticGame.win_check()}")
