@@ -90,6 +90,8 @@ def min_max(curr_game, max_or_min, depth, max_depth, nodes):
     if max_or_min == MINIMIZING:
         min_eval = 1000
         min_move = available_moves[0]
+        for i in range(len(available_moves)):
+            nodes.node_inc()
         for child in available_moves:
             row, col = child
 
