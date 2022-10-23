@@ -9,8 +9,19 @@ O = 1
 MAXIMIZING = 1
 MINIMIZING = 0
 
+
+class Node():
+    def __init__(self):
+        self.num_nodes = 0
+
+    def node_inc(self):
+        self.num_nodes += 1
+
+
+
+
 #this function needs the available function, the win check, and the eval changed. It also needs to be able to pass a depth like normal. 
-def min_max(curr_game, max_or_min, depth, max_depth):
+def min_max(curr_game, max_or_min, depth, max_depth, nodes):
     """
     Here I need to give it the eval function that we are looking for
     """
@@ -45,7 +56,8 @@ def min_max(curr_game, max_or_min, depth, max_depth):
         
         max_eval = -1000
         max_move = available_moves[0]
-        
+        for i in range(len(available_moves)):
+            nodes.node_inc()
         # Searches for best possible maxmizing move
         for child in available_moves:
             row, col = child #does it modify?
@@ -58,7 +70,7 @@ def min_max(curr_game, max_or_min, depth, max_depth):
             new_game.change_players()
             
 
-            eval = min_max(new_game, MINIMIZING, depth + 1, max_depth)
+            eval = min_max(new_game, MINIMIZING, depth + 1, max_depth, nodes)
             # max_eval = max(eval, max_eval)
             
             if eval > max_eval: 
@@ -88,14 +100,14 @@ def min_max(curr_game, max_or_min, depth, max_depth):
             # new_game.available.remove("{0},{1}".format(row, col))
             new_game.change_players()
 
-            eval = min_max(new_game, MAXIMIZING, depth + 1, max_depth)
+            eval = min_max(new_game, MAXIMIZING, depth + 1, max_depth, nodes)
 
             if eval < min_eval: 
-                min_eval = eval
-                min_move = child
+                min_eval = eval 
+                min_move = child 
 
         if depth == 0: 
-            print("min move score:", min_eval)
+            print("min move score:", min_eval) #I don't think this will ever print. Depth 0 is always "MAXIMIZING"
             return min_move
         return min_eval
 
@@ -438,21 +450,43 @@ if __name__ == '__main__':
 #    moves = ticGame.successor_function()
     depth = 2
     ticGame.display()
+    game = []
+    move_num = 1
+
     while ticGame.win_check() == False and len(ticGame.successor_function()) != 0:
         if ticGame.current_player() == "X":
-            move = min_max(ticGame, MAXIMIZING, 0, 3)
+            nodes = Node()
+            start = time.process_time()
+            move = min_max(ticGame, MAXIMIZING, 0, 3, nodes)
+            end = time.process_time()
+
             print("X move:", move)
+            print("Nodes:", nodes.num_nodes)
+            print("Time elapsed:", end - start)
+            move_info = (move_num, "Player 1", move, f"Time elapsed: {end - start}", f"Expanded Nodes: {nodes.num_nodes}")
+            game.append(move_info)
         else:
-            move = min_max(ticGame, MAXIMIZING, 0, 3)
-            print("O move:", move)
+            nodes = Node()
+            start = time.process_time()
+            move = min_max(ticGame, MAXIMIZING, 0, 3, nodes)
+            end = time.process_time()
             
+            print("O move:", move)
+            print("Nodes:", nodes.num_nodes)
+            print("Time elapsed:", end - start)
+            move_info = (move_num, "Player 2", move, f"Time elapsed: {end - start}", f"Expanded Nodes: {nodes.num_nodes}")
+            game.append(move_info)
+            move_num += 1
+            
+        
 
         ticGame.board[move[0]][move[1]] = ticGame.current_player()
         ticGame.change_players()
 
         ticGame.display()
         #time.sleep(2)
-    
+    for move in game:
+        print(move)
     if len(ticGame.successor_function()) == 0:
         print("DRAW")
     else:
