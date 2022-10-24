@@ -32,7 +32,7 @@ def min_max(curr_game, max_or_min, depth, max_depth, nodes):
     if len(available_moves) == 0 or curr_game.win_check() == True or depth == max_depth:
         #Check for win
         if curr_game.win_check() == True:
-            if max_or_min == MAXIMIZING: #this needs to be changed to max or min I think
+            if max_or_min == MAXIMIZING: 
                 return -1000
             elif max_or_min == MINIMIZING:
                 return 1000       
@@ -43,6 +43,7 @@ def min_max(curr_game, max_or_min, depth, max_depth, nodes):
 
         #Check when max depth is hit
         else:
+            curr_game.change_players()
             evaluate = eval_board(curr_game, curr_game.current_player())
             return evaluate
  
@@ -63,7 +64,7 @@ def min_max(curr_game, max_or_min, depth, max_depth, nodes):
             new_game = copy.deepcopy(curr_game)
 
             
-            new_game.board[int(row) - 1][int(col) - 1] = new_game.current_player()
+            new_game.board[int(row)][int(col)] = new_game.current_player()
             #new_game.available.remove("{0},{1}".format(row, col))
             new_game.change_players()
             
@@ -98,7 +99,7 @@ def min_max(curr_game, max_or_min, depth, max_depth, nodes):
             new_game = copy.deepcopy(curr_game)
 
             
-            new_game.board[int(row) - 1][int(col) - 1] = new_game.current_player()
+            new_game.board[int(row)][int(col)] = new_game.current_player()
             # new_game.available.remove("{0},{1}".format(row, col))
             new_game.change_players()
 
