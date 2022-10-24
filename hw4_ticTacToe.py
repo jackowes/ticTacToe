@@ -251,14 +251,14 @@ class ticTacToe:
                         ["-","-","-","-","-","-"], 
                         ["-","-","-","-","-","-"]]
 
-        # self.board =   [["-","-","-","-","-","-"],
-        #                 ["-","-","-","-","-","-"],
-        #                 ["-","-","-","-","-","-"], 
-        #                 ["-","-","-","-","-","-"], 
-        #                 ["0","-","-","-","-","-"]]
+        self.board =   [["-","-","-","-","-","-"],
+                        ["-","-","-","-","-","-"],
+                        ["-","-","-","-","-","-"], 
+                        ["-","-","-","-","-","-"], 
+                        ["-","-","-","-","-","-"]]
         
-        # self.board[random.randrange(0,5)][random.randrange(0,6)] = "X"
-        # self.board[random.randrange(0,5)][random.randrange(0,6)] = "O"
+        self.board[random.randrange(0,5)][random.randrange(0,6)] = "X"
+        self.board[random.randrange(0,5)][random.randrange(0,6)] = "O"
         
         
         #As the available squares are now only adjacent squares I don't think this is usable any longer
@@ -436,16 +436,25 @@ if __name__ == '__main__':
     ticGame.display()
     game = []
     move_num = 1
+    mode = 0
+    mode = int(input("Enter 0 for manual and 1 for bot : "))
+    difficulty = 0
+    if(mode == 0):
+        difficulty = int(input("Enter the difficulty from 1 to 5(this is just the depth of minmax): "))
 
     while ticGame.win_check() == False and len(ticGame.successor_function()) != 0:
         if ticGame.current_player() == "X":
             nodes = Node()
             start = time.process_time()
-            move = min_max(ticGame, MAXIMIZING, 0, 2, nodes)
+            if(mode == 1):
+                move = min_max(ticGame, MAXIMIZING, 0, 2, nodes)
+            else:
+                move = min_max(ticGame, MAXIMIZING, 0, difficulty, nodes)
             end = time.process_time()
             elapsed_time = round(end - start, 2)
+            smove = (move[0] + 1, move[1] + 1)
 
-            print("X move:", move)
+            print("X move:", smove)
             print("Nodes:", nodes.num_nodes)
             print("Time elapsed:", end - start)
 
@@ -453,20 +462,29 @@ if __name__ == '__main__':
             move_info = (move_num, "Player 1", (move[0] + 1, move[1] + 1), f"Time elapsed: {elapsed_time}", f"Expanded Nodes: {nodes.num_nodes}")
             game.append(move_info)
         else:
-            nodes = Node()
-            start = time.process_time()
-            move = min_max(ticGame, MAXIMIZING, 0, 4, nodes)
-            end = time.process_time()
-            elapsed_time = round(end - start, 2)
-            
-            print("O move:", move)
-            print("Nodes:", nodes.num_nodes)
-            print("Time elapsed:", end - start)
+            if(mode == 1):
+                nodes = Node()
+                start = time.process_time()
+                move = min_max(ticGame, MAXIMIZING, 0, 4, nodes)
+                end = time.process_time()
+                elapsed_time = round(end - start, 2)
+                smove = (move[0] + 1, move[1] + 1)
+                
+                print("O move:", smove)
+                print("Nodes:", nodes.num_nodes)
+                print("Time elapsed:", end - start)
 
-            #offset move_info by 1 because output should be 1-indexed
-            move_info = (move_num, "Player 2", (move[0] + 1, move[1] + 1), f"Time elapsed: {elapsed_time}", f"Expanded Nodes: {nodes.num_nodes}")
-            game.append(move_info)
-            move_num += 1
+                #offset move_info by 1 because output should be 1-indexed
+                move_info = (move_num, "Player 2", (move[0] + 1, move[1] + 1), f"Time elapsed: {elapsed_time}", f"Expanded Nodes: {nodes.num_nodes}")
+                game.append(move_info)
+                move_num += 1
+
+            elif(mode == 0):
+                strmove = input("Enter your move \"row col\" 1 indexed: ")
+                row, col = strmove.split()
+                row = int(row) - 1
+                col = int(col) - 1
+                move = (row, col)
             
         
 
