@@ -18,8 +18,6 @@ class Node():
         self.num_nodes += 1
 
 
-
-
 #this function needs the available function, the win check, and the eval changed. It also needs to be able to pass a depth like normal. 
 def min_max(curr_game, max_or_min, depth, max_depth, nodes):
     """
@@ -45,8 +43,8 @@ def min_max(curr_game, max_or_min, depth, max_depth, nodes):
 
         #Check when max depth is hit
         else:
-            eval = eval_board(curr_game, curr_game.current_player())
-            return eval
+            evaluate = eval_board(curr_game, curr_game.current_player())
+            return evaluate
  
 
     """
@@ -70,16 +68,18 @@ def min_max(curr_game, max_or_min, depth, max_depth, nodes):
             new_game.change_players()
             
 
-            eval = min_max(new_game, MINIMIZING, depth + 1, max_depth, nodes)
-            # max_eval = max(eval, max_eval)
+            evaluate = min_max(new_game, MINIMIZING, depth + 1, max_depth, nodes)
             
-            if eval > max_eval: 
-                max_eval = eval
+            if evaluate > max_eval: 
+                # print("evaluate =", evaluate)
+                # print("max eval =", max_eval, end= "\n\n")
+                max_eval = evaluate
                 max_move = child
             
         # Return move if we finish searching or max eval if we still need to search
         if depth == 0: 
             print("max move score:", max_eval)
+            print("max_move: ", max_move)
             return max_move
         return max_eval
             
@@ -102,10 +102,12 @@ def min_max(curr_game, max_or_min, depth, max_depth, nodes):
             # new_game.available.remove("{0},{1}".format(row, col))
             new_game.change_players()
 
-            eval = min_max(new_game, MAXIMIZING, depth + 1, max_depth, nodes)
+            evaluate = min_max(new_game, MAXIMIZING, depth + 1, max_depth, nodes)
 
-            if eval < min_eval: 
-                min_eval = eval 
+            if evaluate < min_eval: 
+                # print("evaluate =", evaluate)
+                # print("min eval =", min_eval, end= "\n\n")
+                min_eval = evaluate 
                 min_move = child 
 
         if depth == 0: 
@@ -239,11 +241,6 @@ class ticTacToe:
         """
         Creates empty ticTacToe board
         """
-        # for i in range(3):
-        #     row = []
-        #     for j in range(3):
-        #          row.append('-')
-        #     self.board.append(row)
 
         #Should this board just be populated in this way in the constructor
         #Or should I create this board using for statements and a row and col variable so that the size can be changed? I think that's too much as the win check would have to be changed too
@@ -428,22 +425,6 @@ class ticTacToe:
 
 
 
-
-    
-
-
-    
-
-
-#=======================================
-# def main(choice):
-    
-
-
-#it is going to take a game state then spit back the spot to place the move
-
-
-
 #=======================================
 if __name__ == '__main__':
     #eval_board(None, None)
@@ -459,24 +440,30 @@ if __name__ == '__main__':
         if ticGame.current_player() == "X":
             nodes = Node()
             start = time.process_time()
-            move = min_max(ticGame, MAXIMIZING, 0, 3, nodes)
+            move = min_max(ticGame, MAXIMIZING, 0, 2, nodes)
             end = time.process_time()
+            elapsed_time = round(end - start, 2)
 
             print("X move:", move)
             print("Nodes:", nodes.num_nodes)
             print("Time elapsed:", end - start)
-            move_info = (move_num, "Player 1", move, f"Time elapsed: {end - start}", f"Expanded Nodes: {nodes.num_nodes}")
+
+            #offset move_info by 1 because output should be 1-indexed
+            move_info = (move_num, "Player 1", (move[0] + 1, move[1] + 1), f"Time elapsed: {elapsed_time}", f"Expanded Nodes: {nodes.num_nodes}")
             game.append(move_info)
         else:
             nodes = Node()
             start = time.process_time()
-            move = min_max(ticGame, MAXIMIZING, 0, 3, nodes)
+            move = min_max(ticGame, MAXIMIZING, 0, 4, nodes)
             end = time.process_time()
+            elapsed_time = round(end - start, 2)
             
             print("O move:", move)
             print("Nodes:", nodes.num_nodes)
             print("Time elapsed:", end - start)
-            move_info = (move_num, "Player 2", move, f"Time elapsed: {end - start}", f"Expanded Nodes: {nodes.num_nodes}")
+
+            #offset move_info by 1 because output should be 1-indexed
+            move_info = (move_num, "Player 2", (move[0] + 1, move[1] + 1), f"Time elapsed: {elapsed_time}", f"Expanded Nodes: {nodes.num_nodes}")
             game.append(move_info)
             move_num += 1
             
@@ -487,6 +474,8 @@ if __name__ == '__main__':
 
         ticGame.display()
         #time.sleep(2)
+
+    #Print output
     for move in game:
         print(move)
     if len(ticGame.successor_function()) == 0:
